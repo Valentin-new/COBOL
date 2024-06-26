@@ -1,0 +1,33 @@
+IDENTIFICATION DIVISION.
+       PROGRAM-ID. YOUR-PROGRAM-NAME.
+       DATA DIVISION.
+       FILE SECTION.
+       WORKING-STORAGE SECTION.
+       01 N                 PIC 9(3).
+       01 I                 PIC 9(3).
+       01 FIB-1             PIC 9(10) VALUE 0.
+       01 FIB-2             PIC 9(10) VALUE 1.
+       01 FIB-SIGUIENTE     PIC 9(10).
+       
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE.
+            DISPLAY "iNTRODUCE NUMERO FIB"
+            ACCEPT N
+            
+            IF N > 0 THEN 
+                DISPLAY "SECUENCIA FIB"
+                DISPLAY FIB-1
+            END-IF.
+                
+            IF N > 1 THEN
+                DISPLAY FIB-2
+                PERFORM CALC-FIB VARYING I FROM 3 BY 1 UNTIL I > N
+            END-IF. 
+                
+            STOP RUN.
+            
+       CALC-FIB.
+           COMPUTE FIB-SIGUIENTE = FIB-1 + FIB-2.
+           DISPLAY FIB-SIGUIENTE.
+           MOVE FIB-2 TO FIB-1.
+           MOVE FIB-SIGUIENTE TO FIB-2.
