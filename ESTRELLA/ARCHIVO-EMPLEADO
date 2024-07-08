@@ -1,0 +1,129 @@
+IDENTIFICATION DIVISION.
+       PROGRAM-ID. YOUR-PROGRAM-NAME.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ARCHIVO-EMPLEADO ASSIGN TO 'emp.dat'
+           ORGANIZATION IS INDEXED
+           ACCESS MODE IS DYNAMIC
+           RECORD KEY IS CLAVE-EMPLEADO
+           FILE STATUS IS ESTADO-ARCHIVO.
+       DATA DIVISION.
+       FILE SECTION.
+       FD ARCHIVO-EMPLEADO.
+       01 REGISTRO-EMPLEADO.
+           05 CLAVE-EMPLEADO   PIC 9(4).
+           05 NOMBRE-EMPLEADO  PIC X(20).
+           05 DEPARTAMENTO     PIC X(30).
+           05 SALARIO          PIC 9(5).
+           
+       WORKING-STORAGE SECTION.
+       01 ESTADO-ARCHIVO       PIC XX.
+       01 OPCION               PIC 9.
+       01 CONTINUAR            PIC X VALUE 'S'.
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE.
+            PERFORM INICIALIZAR.
+            PERFORM UNTIL CONTINUAR = 'N'
+              DISPLAY 'seleccione una operacion:'
+              DISPLAY '1. Crear'
+              DISPLAY '2. Leer'
+              DISPLAY '3. Actualizar'
+              DISPLAY '4. Eliminar'
+              ACCEPT OPCION
+              EVALUATE OPCION
+                WHEN 1
+                   PERFORM CREAR-EMPLEADO
+                WHEN 2
+                   PERFORM LEER-EMPLEADO
+                WHEN 3
+                   PERFORM ACTUALIZAR-EMPLEADO
+                WHEN 4 
+                   PERFORM ELIMINAR-EMPLEADO
+                WHEN OTHER
+                   DISPLAY 'Opcción inválida'
+              END-EVALUATE
+              DISPLAY '¿Deseas continuar? (S/N)'
+              ACCEPT CONTINUAR
+            END-PERFORM
+            PERFORM FINALIZAR
+            
+            STOP RUN.
+            
+        
+        FINALIZAR.
+            CLOSE ARCHIVO-EMPLEADO.
+            
+        INICIALIZAR.    
+         OPEN I-O ARCHIVO-EMPLEADO
+         IF ESTADO-ARCHIVO = '35'
+             OPEN OUTPUT ARCHIVO-EMPLEADO
+             CLOSE ARCHIVO-EMPLEADO
+             OPEN I-O ARCHIVO-EMPLEADO
+         END-IF.
+            
+        CREAR-EMPLEADO.
+            DISPLAY 'Ingrese la clave del empleado:'
+            ACCEPT CLAVE-EMPLEADO
+            DISPLAY 'Ingrese el nombre del empleado:'
+            ACCEPT NOMBRE-EMPLEADO
+            DISPLAY 'Ingrese el departamento:'
+            ACCEPT DEPARTAMENTO
+            DISPLAY 'Ingrese el salario:'
+            ACCEPT SALARIO
+            WRITE REGISTRO-EMPLEADO
+            IF ESTADO-ARCHIVO = '00'
+                DISPLAY 'Empleado creado exisitosamente'
+            ELSE
+                DISPLAY 'Error al crear el empleado'
+            END-IF.
+             
+        LEER-EMPLEADO.
+            DISPLAY 'Ingrese la clave del empleado a leer:'
+            ACCEPT CLAVE-EMPLEADO
+            READ ARCHIVO-EMPLEADO KEY IS CLAVE-EMPLEADO
+            IF ESTADO-ARCHIVO = '00'
+                DISPLAY 'Nombre del empleado:' NOMBRE-EMPLEADO
+                DISPLAY 'Departamento: ' DEPARTAMENTO
+                DISPLAY 'Salario: ' SALARIO
+            ELSE
+                DISPLAY 'Empleado no encontrado'
+                
+            END-IF.
+            
+        ACTUALIZAR-EMPLEADO.
+            DISPLAY 'Ingrese la clave del empleado a actualizar:'
+            ACCEPT CLAVE-EMPLEADO.
+            READ ARCHIVO-EMPLEADO KEY IS CLAVE-EMPLEADO
+            IF ESTADO-ARCHIVO = '00'
+                DISPLAY 'Ingrese el nuevo nombre del empleado:'
+                ACCEPT NOMBRE-EMPLEADO
+                DISPLAY 'Ingrese el nuevo departamento:'
+                ACCEPT DEPARTAMENTO
+                DISPLAY 'Ingrese el nuevo salario: '
+                ACCEPT SALARIO
+                REWRITE REGISTRO-EMPLEADO
+                IF ESTADO-ARCHIVO = '00'
+                    DISPLAY 'Empleado actualizado exitosamente.'
+                ELSE
+                    DISPLAY 'Error al actualizar el empleado'
+                END-IF
+            
+            ELSE
+                DISPLAY 'Empleado no encontrado.'
+            END-IF.
+                
+        ELIMINAR-EMPLEADO.
+            DISPLAY 'Ingrese la clave del empleado a eliminar:'
+            ACCEPT CLAVE-EMPLEADO
+            READ ARCHIVO-EMPLEADO KEY IS CLAVE-EMPLEADO
+            IF ESTADO-ARCHIVO = '00'
+                DELETE ARCHIVO-EMPLEADO
+                IF ESTADO-ARCHIVO = '00'
+                    DISPLAY 'Empleado eliminado existosamente.'
+                ELSE
+                    DISPLAY 'Error al eliminar el empleado'
+                END-IF
+            ELSE
+                DISPLAY 'Empleado no encontrado'
+            END-IF.
