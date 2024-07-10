@@ -1,0 +1,164 @@
+IDENTIFICATION DIVISION.
+       PROGRAM-ID. YOUR-PROGRAM-NAME.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ARCHIVO-EMPLEADO ASSIGN TO 'empleado1.dat'
+           ORGANIZATION IS RELATIVE
+           ACCESS MODE IS DYNAMIC
+           RELATIVE KEY IS CLAVE-EMPLEADO
+           FILE STATUS IS ESTADO-ARCHIVO.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD ARCHIVO-EMPLEADO.
+       01 REGISTRO-EMPLEADO.
+           05 CLAVE-EMPLEADO        PIC 9(4).
+           05 NOMBRE-EMPLEADO       PIC X(30).
+           05 DEPARTAMENTO          PIC X(30).
+           05 SALARIO               PIC 9(5).
+
+       WORKING-STORAGE SECTION.
+       01 ESTADO-ARCHIVO            PIC XX.
+       01 OPCION                    PIC 9.
+       01 CONTINUAR                 PIC X VALUE 'S'.
+       01 WS-CLAVE-EMPLEADO         PIC 9(4).
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE.
+            PERFORM INICIALIZAR
+            PERFORM UNTIL CONTINUAR = 'N'
+              DISPLAY 'Seleccine una operacion:'
+              DISPLAY '1. Crear'
+              DISPLAY '2. Leer'
+              DISPLAY '3. Actualizar'
+              DISPLAY '4. Eliminar'
+              DISPLAY '5. Mostrar todos los elementos'
+              ACCEPT OPCION
+              EVALUATE OPCION
+                 WHEN 1
+                    PERFORM CREAR-EMPLEADO
+                 WHEN 2
+                    PERFORM LEER-EMPLEADO
+                 WHEN 3
+                     PERFORM ACTUALIZAR-EMPLEADO
+                 WHEN 4
+                     PERFORM ELIMINAR-EMPLEADO
+                 WHEN 5
+                     PERFORM LISTAR-EMPLEADOS
+                 WHEN OTHER
+                     DISPLAY 'Opccion inválida'
+              END-EVALUATE
+              DISPLAY '¿Desea continuar? (S/N)'
+              ACCEPT CONTINUAR
+            END-PERFORM
+            PERFORM FINALIZAR
+
+            STOP RUN.
+
+
+        FINALIZAR.
+            CLOSE ARCHIVO-EMPLEADO.
+
+        INICIALIZAR.
+            OPEN I-O ARCHIVO-EMPLEADO
+            IF ESTADO-ARCHIVO = '35'
+                OPEN OUTPUT ARCHIVO-EMPLEADO
+                CLOSE ARCHIVO-EMPLEADO
+                OPEN I-O ARCHIVO-EMPLEADO
+             END-IF.
+
+        CREAR-EMPLEADO.
+            DISPLAY 'Ingrese la clave del emeplado:'
+            ACCEPT CLAVE-EMPLEADO
+            DISPLAY 'Ingrese el nombre del empleado:'
+            ACCEPT NOMBRE-EMPLEADO
+            DISPLAY 'Ingrese el departamento'
+            ACCEPT DEPARTAMENTO
+            DISPLAY 'Ingrese el salario:'
+            ACCEPT SALARIO
+
+            MOVE CLAVE-EMPLEADO TO WS-CLAVE-EMPLEADO
+            WRITE REGISTRO-EMPLEADO INVALID KEY
+                DISPLAY 'Error clave duplicada o fuera de rango'
+            END-WRITE
+            IF ESTADO-ARCHIVO = '00'
+                DISPLAY 'Empleado creado existosamente'
+            ELSE
+                DISPLAY 'Estado del archivo: ' ESTADO-ARCHIVO
+            END-IF.
+
+         LEER-EMPLEADO.
+             DISPLAY 'Ingrese la clave del empleado a leer:'
+             ACCEPT WS-CLAVE-EMPLEADO
+             MOVE WS-CLAVE-EMPLEADO TO CLAVE-EMPLEADO
+             READ ARCHIVO-EMPLEADO INVALID KEY
+                 DISPLAY 'Emplado no encontrar'
+             END-READ
+
+             IF ESTADO-ARCHIVO = '00'
+                 DISPLAY 'Nombre del empleado: ' NOMBRE-EMPLEADO
+                 DISPLAY 'Departamento: ' DEPARTAMENTO
+                 DISPLAY 'Salario: ' SALARIO
+             END-IF.
+
+        ACTUALIZAR-EMPLEADO.
+            DISPLAY 'Ingrese la clave del empleado a actualizar:'
+            ACCEPT WS-CLAVE-EMPLEADO
+            MOVE WS-CLAVE-EMPLEADO TO CLAVE-EMPLEADO
+            READ ARCHIVO-EMPLEADO INVALID KEY
+                DISPLAY 'Empleado no encotrado'
+            END-READ
+
+            IF ESTADO-ARCHIVO = '00'
+                DISPLAY 'Ingrese el nuevo nombre del empleado: '
+                ACCEPT NOMBRE-EMPLEADO
+                DISPLAY 'Ingrese el nuevo departamento: '
+                ACCEPT DEPARTAMENTO
+                DISPLAY 'Ingrese el nuevo salario: '
+                ACCEPT SALARIO
+
+                REWRITE REGISTRO-EMPLEADO INVALID KEY
+                  DISPLAY 'Error al actualizar el empleado'
+                END-REWRITE
+
+                IF ESTADO-ARCHIVO ='00'
+                    DISPLAY 'Empleado actuailizado exitosamente'
+                END-IF
+            END-IF.
+
+        ELIMINAR-EMPLEADO.
+
+          DISPLAY 'Ingrese la clave del empleado a eliminar: '
+          ACCEPT WS-CLAVE-EMPLEADO
+          MOVE WS-CLAVE-EMPLEADO TO CLAVE-EMPLEADO
+
+          READ ARCHIVO-EMPLEADO INVALID KEY
+              DISPLAY 'Empleado no encontrado.'
+          END-READ
+
+          IF ESTADO-ARCHIVO = '00'
+              DELETE ARCHIVO-EMPLEADO INVALID KEY
+                  DISPLAY 'Error al eliminar el empleado'
+              END-DELETE
+
+              IF ESTADO-ARCHIVO = '00'
+                  DISPLAY 'Emplado elimnado existosamente'
+              END-IF
+          END-IF.
+
+         LISTAR-EMPLEADOS.
+
+            MOVE 1 TO WS-CLAVE-EMPLEADO
+            PERFORM UNTIL ESTADO-ARCHIVO = '10'
+               READ ARCHIVO-EMPLEADO KEY IS WS-CLAVE-EMPLEADO
+                  AT END
+                     MOVE '10' TO ESTADO-ARCHIVO
+                  NOT AT END
+                      DISPLAY 'Clave: ' CLAVE-EMPLEADO
+                      DISPLAY 'Nombre: ' NOMBRE-EMPLEADO
+                      DISPLAY 'Departamento: ' DEPARTAMENTO
+                      DISPLAY 'Salario: ' SALARIO
+
+                      ADD 1 TO WS-CLAVE-EMPLEADO
+                END-READ
+            END-PERFORM.
