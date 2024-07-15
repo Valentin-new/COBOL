@@ -1,0 +1,14 @@
+IDENTIFICATION DIVISION.
+         PROGRAM-ID. ProgramaPrincipal.
+
+         DATA DIVISION.
+         WORKING-STORAGE SECTION.
+          01 WS-NUM1 PIC 9(4) VALUE 5.
+          01 WS-NUM2 PIC 9(4) VALUE 10.
+          01 WS-RESUL PIC 9(4).
+
+         PROCEDURE DIVISION.
+            DISPLAY 'Llamando a la subrutina para sumar dos números.'.
+            CALL 'SumarNumeros' USING WS-NUM1 WS-NUM2 WS-RESUL.
+            DISPLAY 'Resultado de la suma: ' WS-RESUL.
+             STOP RUN.
